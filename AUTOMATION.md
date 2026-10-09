@@ -25,17 +25,17 @@ Codex는 매시 정각, Claude Code는 매시 30분에 아래 프롬프트로 �
 
 1. 저장소 루트에서 `git fetch origin main && git checkout main && git pull --ff-only origin main`. 실패하면 아무것도 고치지 말고 원인만 보고하고 끝낸다.
 2. 루트의 `CLAUDE.md`(및 `@COMMON.md`) 절차를 따른다. 서브에이전트는 `.claude/agents/` 에 있다.
-3. `STATUS.md`의 "현재 차례"가 `Claude`가 아니면 파일을 고치지 말고 "차례 아님: <현재 차례> / <요청>" 한 줄만 보고하고 끝낸다.
-4. 차례가 `Claude`면 `reviews/0N_rK.md`를 쓰고 `STATUS.md`를 갱신한다. `docs/`, `specs/`, `aside/`는 고치지 않는다.
-5. 바뀐 파일만 commit(메시지: `[Claude] 검수 0N rK → <다음 차례>`) 후 `git push origin main`. 거절되면 `git pull --rebase origin main` 후 한 번만 재시도하고, 그래도 실패하면 보고하고 끝낸다.
+3. `STATUS.md`의 "현재 차례"가 `Claude`면 **검수 모드**: `reviews/0N_rK.md`를 쓰고 `STATUS.md`를 갱신한다. `docs/`, `specs/`, `aside/`는 고치지 않는다. 커밋 메시지: `[Claude] 검수 0N rK → <다음 차례>`.
+4. 차례가 `Claude`가 아니면 **수집 모드**: CLAUDE.md "수집 모드" 절차대로 `aside/ASIDE_BRIEF.md`의 이번 배치에서 `대기` ID를 최대 4개 골라 서브에이전트 `data-collector`로 카드를 `aside/inbox/`에 저장하고 `aside/collect_log.md`를 갱신한다. `STATUS.md`는 고치지 않는다. 커밋 메시지: `[Claude] 수집 Bn: <ID 목록>`. 수집할 것이 없으면 "수집할 것 없음" 한 줄만 보고하고 끝낸다(커밋 없음).
+5. 바뀐 파일만 commit 후 `git push origin main`. 거절되면 `git pull --rebase origin main` 후 한 번만 재시도하고, 그래도 실패하면 보고하고 끝낸다.
 6. 충돌 사본 파일(`파일 (1).md` 등)이나 이상한 상태를 발견하면 멈추고 보고만 한다.
 ```
 
 ## 사용자가 개입하는 때
 
+수집은 Claude 수집 모드가 자동으로 하므로 사용자 개입이 필요 없다. 사용자가 개입하는 것은 아래 두 경우뿐이다.
+
 | 상황 | STATUS.md 신호 | 할 일 |
 |---|---|---|
-| Aside 수집 | (언제든) | Aside 실행 → `aside/inbox/` 카드 push → "대기 요청"에 `D. 수집 결과 반영 (배치 Bn)` 추가 |
 | 쟁점 결정 | `차례=사용자`, "사용자 결정 필요"에 항목 | 줄 끝에 `→ 결정: …` 적고, 차례를 `Codex`, 요청을 `0N 사용자 결정 반영`으로 바꿔 push |
-| Aside 배치 요청 | `차례=사용자`, `요청=Aside 배치 Bn 실행` | Aside 실행 후 위 "Aside 수집"과 같이 하고, 차례를 `Codex`로 돌려 push |
-| 전체 완료 | `차례=사용자`, `요청=전체 완료` | 결과 확인. 예약 끄기 |
+| 전체 완료 | `차례=사용자`, `요청=전체 완료` | 결과 확인. 두 예약 끄기 |

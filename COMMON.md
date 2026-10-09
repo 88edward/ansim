@@ -1,4 +1,4 @@
-# 공통 작업 지침 (Codex · Claude Code · Aside 공통)
+# 공통 작업 지침 (Codex · Claude Code 공통)
 
 Codex는 AGENTS.md의 지시로, Claude Code는 CLAUDE.md의 `@COMMON.md` 가져오기로 이 파일을 읽는다.
 
@@ -16,8 +16,8 @@ Codex는 AGENTS.md의 지시로, Claude Code는 CLAUDE.md의 `@COMMON.md` 가져
 | 역할 | 담당 | 쓰는 파일 | 하지 않는 것 |
 |---|---|---|---|
 | 작성·총괄 (전체 작업 수행) | Codex (GPT) | `docs/`, `aside/ASIDE_BRIEF.md`, `aside/digest.md`, `reviews/*_response.md`, `STATUS.md` | 검수 판정 |
-| 검수 | Claude Code | `reviews/0N_rK.md`, `STATUS.md` | `docs/` 직접 수정 |
-| 자료 수집 | Aside 브라우저 | `aside/inbox/` 만 | 문서 작성, 해석·판단 |
+| 검수 | Claude Code (검수 모드) | `reviews/0N_rK.md`, `STATUS.md` | `docs/` 직접 수정 |
+| 자료 수집 | Claude Code (수집 모드, 서브에이전트 `data-collector`) | `aside/inbox/`, `aside/collect_log.md` | 문서 작성, 해석·판단, `STATUS.md` 수정 |
 | 결정 | 사용자 | 전부 | — |
 
 ## 3. 작업 흐름
@@ -28,11 +28,14 @@ Codex 작성(vN) → Claude 검수(reviews/0N_rK.md) → Codex 반영(response +
 PASS → Codex가 완료 처리(E)하고 남은 문서로 자동으로 넘어감. 둘 다 완료면 사용자에게.
 r4 검수에서도 FAIL이거나 같은 지적이 두 번째로 반박되면 사용자 판단(8절).
 
-[데이터 수집 (문서 02의 근거)]
-Codex: ASIDE_BRIEF.md에 이번 배치 작성 → 사용자: Aside 실행
-→ Aside: aside/inbox/ 에 카드 저장 → Codex(aside_digester): digest.md 압축
-→ Codex: digest만 보고 docs/02 작성 → Claude 검수
+[데이터 수집 (문서 02의 근거) — 사용자 개입 없이 자동]
+Codex(C): ASIDE_BRIEF.md에 이번 배치 작성 (차례는 넘기지 않음)
+→ Claude(수집 모드): 자기 차례가 아닌 실행마다 카드 몇 장씩 aside/inbox/ 에 저장, collect_log.md에 진행 기록
+→ 배치를 다 모으면 collect_log.md에 `수집 완료`
+→ Codex(D, 자기 차례에): aside_digester로 digest.md 압축 → docs/02 갱신 → Claude 검수
 ```
+
+Claude Code의 한 번 실행은 **차례가 Claude면 검수 모드, 아니면 수집 모드**다. 한 실행에서 둘 다 하지 않는다.
 
 ## 4. 폴더 구조
 
@@ -47,8 +50,9 @@ Codex: ASIDE_BRIEF.md에 이번 배치 작성 → 사용자: Aside 실행
 ├─ docs/              결과 문서
 ├─ reviews/           검수 결과와 반영 응답
 ├─ aside/
-│  ├─ ASIDE_BRIEF.md  Aside 수집 지시서
-│  ├─ inbox/          Aside가 저장한 카드 원본
+│  ├─ ASIDE_BRIEF.md  수집 지시서 ("이번 배치"는 Codex, 나머지는 사용자)
+│  ├─ collect_log.md  배치별 수집 진행 기록 (Claude 수집 모드만 수정)
+│  ├─ inbox/          수집 카드 원본 (Claude 수집 모드만 저장)
 │  └─ digest.md       카드 요약표 (Codex가 읽는 유일한 수집 결과)
 ├─ .claude/agents/    Claude Code 서브에이전트
 └─ .codex/agents/     Codex 서브에이전트
@@ -57,11 +61,11 @@ Codex: ASIDE_BRIEF.md에 이번 배치 작성 → 사용자: Aside 실행
 ## 5. 동기화 규칙 (충돌 방지)
 
 - 공용 브랜치는 `main`이다. 매 실행은 `git pull origin main` → 작업 → 바뀐 파일만 commit → `git push origin main` 순서로 한다. 다른 브랜치나 PR을 만들지 않는다.
-- 커밋 메시지: `[Codex] <작업> → <다음 차례>`, `[Claude] 검수 0N rK → <다음 차례>`, `[사용자] <내용>`.
-- Aside 카드는 사용자의 컴퓨터에 저장되므로, 사용자가 `aside/inbox/`의 카드를 `main`에 push해야 Codex가 볼 수 있다.
+- 커밋 메시지: `[Codex] <작업> → <다음 차례>`, `[Claude] 검수 0N rK → <다음 차례>`, `[Claude] 수집 Bn: <ID 목록>`, `[사용자] <내용>`.
 - 자기 담당 파일만 수정한다. 다른 담당의 파일은 읽기만 한다.
-- `STATUS.md`의 "현재 차례"가 자기일 때만 작업한다. 끝나면 차례를 넘기고 로그 한 줄을 남긴다.
-- Codex와 Claude Code를 동시에 실행하지 않는다. 동기화가 끝난 뒤 다음 차례를 시작한다.
+- `STATUS.md`의 "현재 차례"가 자기일 때만 문서 작성·검수를 한다. 끝나면 차례를 넘기고 로그 한 줄을 남긴다.
+- 예외: Claude 수집 모드는 차례와 관계없이 돈다. 대신 `aside/inbox/`와 `aside/collect_log.md`만 고치므로 Codex 작업과 파일이 겹치지 않는다.
+- 예약 시각은 Codex 매시 정각, Claude 매시 30분이다 (`AUTOMATION.md`).
 - `파일 (1).md`, `파일-DESKTOP-xxxx.md` 같은 충돌 사본을 발견하면 작업을 멈추고 사용자에게 보고한다.
 
 ## 6. 작성 원칙 (두 문서 공통)
@@ -70,8 +74,8 @@ Codex: ASIDE_BRIEF.md에 이번 배치 작성 → 사용자: Aside 실행
 - 결론을 먼저 쓰고 근거는 뒤에 쓴다. 각 절은 표와 짧은 문단 위주로 쓴다.
 - 확인 상태를 구분해 표기한다.
   - `[목록 확인]` 데이터 목록에서 이름·기간만 확인
-  - `[카탈로그 확인]` Aside 카드로 공개 카탈로그·소개 페이지의 이름·기간·개요만 확인 (카드의 `근거 수준`이 `카탈로그`)
-  - `[설명서 확인]` Aside 카드로 데이터 설명서의 항목·조건까지 확인 (카드의 `근거 수준`이 `설명서`)
+  - `[카탈로그 확인]` 수집 카드로 공개 카탈로그·소개 페이지의 이름·기간·개요만 확인 (카드의 `근거 수준`이 `카탈로그`)
+  - `[설명서 확인]` 수집 카드로 데이터 설명서의 항목·조건까지 확인 (카드의 `근거 수준`이 `설명서`)
   - `[추가 문의]` 안심구역에 보유·제공 여부를 물어야 함
   - `[외부 확보]` 운영사·점포·현장 조사 등으로 확보
   - `[가설]` 데이터로 검증할 주장
@@ -87,7 +91,7 @@ Codex: ASIDE_BRIEF.md에 이번 배치 작성 → 사용자: Aside 실행
 |---|---|---|
 | 검수 결과 | `reviews/<문서번호>_r<회차>.md` | `reviews/01_r2.md` |
 | 반영 응답 | `reviews/<문서번호>_r<회차>_response.md` | `reviews/01_r2_response.md` |
-| Aside 카드 | `aside/inbox/<ID>_<짧은이름>.md` | `aside/inbox/D-07_SKT유동인구.md` |
+| 수집 카드 | `aside/inbox/<ID>_<짧은이름>.md` | `aside/inbox/D-07_SKT유동인구.md` |
 
 ## 8. 사용자 결정 규칙
 
