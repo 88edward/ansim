@@ -1,10 +1,9 @@
 # Codex 서브에이전트: 수집 카드 압축 담당
 # 위치: <프로젝트>/.codex/agents/aside-digester.toml
-# 목적: 메인 GPT가 inbox 원본을 읽지 않도록, 저비용 모델이 카드를 한 장짜리 표로 줄인다.
+# 목적: 메인 GPT가 inbox 원본을 읽지 않도록, 카드를 한 장짜리 표로 줄인다. 모델은 지정하지 않아 메인과 같은 모델(GPT-5.6 Sol)을 쓰고, 추론 수준만 낮춘다.
 
 name = "aside_digester"
 description = "aside/inbox/ 의 수집 카드를 읽어 aside/digest.md 요약표로 압축한다. 문서 작성이나 판단은 하지 않는다. 메인이 '수집 결과 반영(D)' 작업을 시작할 때 사용."
-model = "gpt-6-luna"            # 저비용 모델. 계정에서 쓸 수 없으면 사용 가능한 저비용 모델로 바꾼다
 model_reasoning_effort = "low"
 
 developer_instructions = """
