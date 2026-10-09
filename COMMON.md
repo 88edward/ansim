@@ -30,12 +30,12 @@ r4 검수에서도 FAIL이거나 같은 지적이 두 번째로 반박되면 사
 
 [데이터 수집 (문서 02의 근거) — 사용자 개입 없이 자동]
 Codex(C): ASIDE_BRIEF.md에 이번 배치 작성 (차례는 넘기지 않음)
-→ Claude(수집 모드): 자기 차례가 아닌 실행마다 카드 몇 장씩 aside/inbox/ 에 저장, collect_log.md에 진행 기록
+→ Claude(수집 모드): 매시 45분 수집 전용 실행(및 30분 실행 중 자기 차례가 아닐 때)마다 카드 몇 장씩 aside/inbox/ 에 저장, collect_log.md에 진행 기록
 → 배치를 다 모으면 collect_log.md에 `수집 완료`
 → Codex(D, 자기 차례에): aside_digester로 digest.md 압축 → docs/02 갱신 → Claude 검수
 ```
 
-Claude Code의 한 번 실행은 **차례가 Claude면 검수 모드, 아니면 수집 모드**다. 한 실행에서 둘 다 하지 않는다.
+Claude Code는 매시 두 번 깨어난다. **30분 실행은 차례가 Claude면 검수 모드, 아니면 수집 모드**, **45분 실행은 항상 수집 모드**다. 한 실행에서 둘 다 하지 않는다.
 
 ## 4. 폴더 구조
 
@@ -65,7 +65,7 @@ Claude Code의 한 번 실행은 **차례가 Claude면 검수 모드, 아니면 
 - 자기 담당 파일만 수정한다. 다른 담당의 파일은 읽기만 한다.
 - `STATUS.md`의 "현재 차례"가 자기일 때만 문서 작성·검수를 한다. 끝나면 차례를 넘기고 로그 한 줄을 남긴다.
 - 예외: Claude 수집 모드는 차례와 관계없이 돈다. 대신 `aside/inbox/`와 `aside/collect_log.md`만 고치므로 Codex 작업과 파일이 겹치지 않는다.
-- 예약 시각은 Codex 매시 정각, Claude 매시 30분이다 (`AUTOMATION.md`).
+- 예약 시각은 Codex 매시 정각, Claude 매시 30분(검수·수집)과 45분(수집 전용)이다 (`AUTOMATION.md`).
 - `파일 (1).md`, `파일-DESKTOP-xxxx.md` 같은 충돌 사본을 발견하면 작업을 멈추고 사용자에게 보고한다.
 
 ## 6. 작성 원칙 (두 문서 공통)

@@ -1,6 +1,6 @@
 # 예약 실행 프롬프트
 
-Codex는 매시 정각, Claude Code는 매시 30분에 아래 프롬프트로 실행한다. 둘 다 **저장소 루트**에서 실행하고, 공용 브랜치는 `main`이다.
+Codex는 매시 정각, Claude Code는 매시 30분(검수·수집)과 45분(수집 전용)에 아래 프롬프트로 실행한다. Claude는 전용 작업 세션 하나를 두 예약이 깨운다. 둘 다 **저장소 루트**에서 실행하고, 공용 브랜치는 `main`이다.
 이 파일은 사용자만 수정한다.
 
 ## Codex — 매시 정각
@@ -29,6 +29,17 @@ Codex는 매시 정각, Claude Code는 매시 30분에 아래 프롬프트로 �
 4. 차례가 `Claude`가 아니면 **수집 모드**: CLAUDE.md "수집 모드" 절차대로 `aside/ASIDE_BRIEF.md`의 이번 배치에서 `대기` ID를 최대 4개 골라 서브에이전트 `data-collector`로 카드를 `aside/inbox/`에 저장하고 `aside/collect_log.md`를 갱신한다. `STATUS.md`는 고치지 않는다. 커밋 메시지: `[Claude] 수집 Bn: <ID 목록>`. 수집할 것이 없으면 "수집할 것 없음" 한 줄만 보고하고 끝낸다(커밋 없음).
 5. 바뀐 파일만 commit 후 `git push origin main`. 거절되면 `git pull --rebase origin main` 후 한 번만 재시도하고, 그래도 실패하면 보고하고 끝낸다.
 6. 충돌 사본 파일(`파일 (1).md` 등)이나 이상한 상태를 발견하면 멈추고 보고만 한다.
+```
+
+## Claude Code — 매시 45분 (수집 전용)
+
+```
+정기 수집 시간이다. 저장소의 현재 상태를 기준으로 다음을 수행하라.
+1. 저장소 루트에서 `git fetch origin main && git checkout main && git pull --ff-only origin main`. 실패하면 원인만 보고하고 끝낸다.
+2. `STATUS.md`의 차례와 관계없이 **수집 모드만** 수행한다 (CLAUDE.md "수집 모드" 절). 검수는 하지 않고 `STATUS.md`, `reviews/`, `docs/`는 고치지 않는다.
+3. `aside/ASIDE_BRIEF.md` 이번 배치의 `대기` ID를 최대 4개 골라 서브에이전트 `data-collector`로 카드를 `aside/inbox/`에 저장하고 `aside/collect_log.md`를 갱신한다. 수집할 것이 없으면 "수집할 것 없음" 한 줄만 보고하고 끝낸다(커밋 없음).
+4. 바뀐 파일만 commit(메시지: `[Claude] 수집 Bn: <ID 목록>`) 후 `git push origin main`. 거절되면 `git pull --rebase origin main` 후 한 번만 재시도한다.
+결과는 3줄 이내로 보고한다.
 ```
 
 ## 사용자가 개입하는 때
