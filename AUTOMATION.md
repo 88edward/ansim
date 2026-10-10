@@ -12,7 +12,10 @@ Codex는 매시 정각, Claude Code는 매시 30분(검수·수집)과 45분(수
 2. 루트의 `AGENTS.md`와 `COMMON.md`를 읽고 그 절차(A~E)를 따른다. 서브에이전트 `aside_digester`는 `.codex/agents/aside-digester.toml` 에 있다.
 3. `STATUS.md`의 "현재 차례"가 `Codex`가 아니면 파일을 고치지 말고 "차례 아님: <현재 차례> / <요청>" 한 줄만 보고하고 끝낸다.
 4. 차례가 `Codex`면 "요청"과 "대기 요청"에 맞는 작업을 하고 `STATUS.md`를 갱신한다. `reviews/0N_rK.md`(검수 파일)와 `specs/`는 고치지 않는다.
-5. 바뀐 파일만 commit(메시지: `[Codex] <작업> → <다음 차례>`) 후 `git push origin main`. 거절되면 `git pull --rebase origin main` 후 다시 push한다(최대 3번). 그래도 실패하면 로컬 커밋을 남겨 두지 말고 보고만 하고 끝낸다(다음 실행 1단계가 정리한다).
+5. 바뀐 파일만 commit(메시지: `[Codex] <작업> → <다음 차례>`) 후 `git push origin main` 한다.
+   - non-fast-forward 거절이면 `git pull --rebase origin main` 후 다시 push한다(최대 3번).
+   - `could not read Username`, `Authentication failed`, 자격 증명 없음 등 **CLI 인증 오류**이면 같은 명령을 반복하지 말고, 연결된 GitHub 앱으로 `88edward/ansim`의 `main`에 동일 변경을 반영한다. GitHub 앱에서 최신 `main` SHA와 트리 SHA를 다시 읽고, 변경 파일의 blob → base tree 기반 새 tree → 동일 메시지의 commit을 만든 뒤 `update_ref`를 `expected_sha=확인한 최신 main SHA`, `force=false`로 실행한다. 원격 SHA가 작업 기준과 달라졌으면 먼저 최신 `origin/main`에 rebase한 결과로 blob/tree/commit을 다시 만든다.
+   - GitHub 앱 반영 뒤 원격 `main`의 새 SHA와 변경 파일을 다시 읽어 성공을 검증한다. GitHub 앱도 연결·권한 오류로 실패한 경우에만 백업 브랜치에 로컬 커밋을 보존하고 정확한 오류를 보고한다.
 6. 충돌 사본 파일(`파일 (1).md` 등)이나 이상한 상태를 발견하면 멈추고 보고만 한다.
 
 보고는 AGENTS.md의 "완료 보고 형식"대로 5줄 이내로 한다.
